@@ -46,10 +46,10 @@ class Factory
 
     /**
      * Determine if URL is http protocol
-     * @param $wsdl
+     * @param null|string $wsdl
      * @return bool
      */
-    private function isHttpUrl($wsdl): bool
+    private function isHttpUrl(?string $wsdl): bool
     {
         return filter_var($wsdl, FILTER_VALIDATE_URL) !== false
             && in_array(parse_url($wsdl, PHP_URL_SCHEME), ['http', 'https']);

@@ -1,5 +1,7 @@
 <?php
 
+namespace Tests\Functional;
+
 use GuzzleHttp\Client;
 use Meng\AsyncSoap\Guzzle\Factory;
 use PHPUnit\Framework\TestCase;
@@ -9,98 +11,90 @@ class SoapClientTest extends TestCase
     /** @var  Factory */
     private $factory;
 
+    /** @inheritDoc */
     protected function setUp(): void
     {
         $this->factory = new Factory();
     }
 
-    /**
-     * @test
-     */
-    public function call()
+    /** @test */
+    public function call(): void
     {
-        $client = $this->factory->create(
+        $client   = $this->factory->create(
             new Client(),
-            'http://www.webservicex.net/Statistics.asmx?WSDL'
+            'https://www.crcind.com/csp/samples/SOAP.Demo.CLS?WSDL=1'
         );
-        $response = $client->call('GetStatistics', [['X' => [1,2,3]]]);
+        $response = $client->call('AddInteger', [['Arg1' => 1, 'Arg2' => 2]]);
         self::assertNotEmpty($response);
+        self::assertSame(3, $response->AddIntegerResult);
     }
 
     /**
      * @test
      * @dataProvider webServicesProvider
+     * @param $wsdl
+     * @param $options
+     * @param $function
+     * @param $args
+     * @param $contains
      */
-    public function callAsync($wsdl, $options, $function, $args, $contains)
-    {
-        $client = $this->factory->create(
-            new Client(),
-            $wsdl,
-            $options
-        );
+    public function callAsync(
+        string $wsdl,
+        array $options,
+        string $function,
+        array $args,
+        array $contains
+    ): void {
+        $client   = $this->factory->create(new Client(), $wsdl, $options);
         $response = $client->callAsync($function, $args)->wait();
         self::assertNotEmpty($response);
-        foreach ($contains as $contain) {
-            self::assertArrayHasKey($contain, (array)$response);
+        $response = (array) $response;
+        foreach ($contains as $key => $value) {
+            if (is_array($value)) {
+                $iresult = (array) $response[$key];
+                foreach ($value as $ikey => $ival) {
+                    if (is_string($ikey)) {
+                        self::assertArrayHasKey($ikey, $iresult);
+                    }
+                    self::assertSame($ival, $iresult[$ikey]);
+                }
+            } elseif (is_string($key)) {
+                self::assertArrayHasKey($key, $response);
+                self::assertSame($value, $response[$key]);
+            } else {
+                self::assertArrayHasKey($value, $response);
+            }
         }
     }
 
-    public function webServicesProvider()
+    /**
+     * Data provider to test various Soap actions
+     * @return array[]
+     */
+    public function webServicesProvider(): array
     {
         return [
             [
-                'wsdl' => 'http://www.webservicex.net/Statistics.asmx?WSDL',
-                'options' => [],
-                'function' => 'GetStatistics',
-                'args' => [['X' => [1,2,3]]],
+                'wsdl'     => 'https://www.crcind.com/csp/samples/SOAP.Demo.CLS?WSDL=1',
+                'options'  => [],
+                'function' => 'AddInteger',
+                'args'     => [['Arg1' => 1, 'Arg2' => 2]],
                 'contains' => [
-                    'Sums', 'Average', 'StandardDeviation', 'skewness', 'Kurtosis'
-                ]
+                    'AddIntegerResult' => 3,
+                ],
             ],
             [
-                'wsdl' => 'http://www.webservicex.net/Statistics.asmx?WSDL',
-                'options' => ['soap_version' => SOAP_1_2],
-                'function' => 'GetStatistics',
-                'args' => [['X' => [1,2,3]]],
+                'wsdl'     => 'https://www.crcind.com/csp/samples/SOAP.Demo.CLS?WSDL=1',
+                'options'  => [],
+                'function' => 'LookupCity',
+                'args'     => [['zip' => 90210]],
                 'contains' => [
-                    'Sums', 'Average', 'StandardDeviation', 'skewness', 'Kurtosis'
-                ]
-            ],
-            [
-                'wsdl' => 'http://www.webservicex.net/CurrencyConvertor.asmx?WSDL',
-                'options' => [],
-                'function' => 'ConversionRate',
-                'args' => [['FromCurrency' => 'GBP', 'ToCurrency' => 'USD']],
-                'contains' => [
-                    'ConversionRateResult'
-                ]
-            ],
-            [
-                'wsdl' => 'http://www.webservicex.net/CurrencyConvertor.asmx?WSDL',
-                'options' => ['soap_version' => SOAP_1_2],
-                'function' => 'ConversionRate',
-                'args' => [['FromCurrency' => 'GBP', 'ToCurrency' => 'USD']],
-                'contains' => [
-                    'ConversionRateResult'
-                ]
-            ],
-            [
-                'wsdl' => 'http://www.webservicex.net/bep.asmx?WSDL',
-                'options' => ['soap_version' => SOAP_1_1],
-                'function' => 'BreakEvenPoint',
-                'args' => [['FixedCost' => 1.1, 'VariableCost' => 1.2, 'ReturnsPerUnit' => 1.3]],
-                'contains' => [
-                    'BreakEvenPointResult'
-                ]
-            ],
-            [
-                'wsdl' => 'http://www.webservicex.net/bep.asmx?WSDL',
-                'options' => ['soap_version' => SOAP_1_2],
-                'function' => 'BreakEvenPoint',
-                'args' => [['FixedCost' => 1.1, 'VariableCost' => 1.2, 'ReturnsPerUnit' => 1.3]],
-                'contains' => [
-                    'BreakEvenPointResult'
-                ]
+                    'LookupCityResult' => [
+                        'City'  => 'Beverly Hills',
+                        'State' => 'CA',
+                        'Zip'   => '90210',
+                    ],
+                ],
             ],
         ];
     }

@@ -39,7 +39,7 @@ class SoapClient implements SoapClientInterface
      * @param array  $arguments
      * @return PromiseInterface
      */
-    public function __call($name, $arguments): PromiseInterface
+    public function __call(string $name, array $arguments): PromiseInterface
     {
         return $this->callAsync($name, $arguments);
     }
@@ -52,7 +52,7 @@ class SoapClient implements SoapClientInterface
      * @param array|null $outputHeaders
      * @return mixed
      */
-    public function call($name, array $arguments, array $options = null, $inputHeaders = null, array &$outputHeaders = null)
+    public function call(string $name, array $arguments, array $options = null, $inputHeaders = null, array &$outputHeaders = null)
     {
         $callPromise = $this->callAsync($name, $arguments, $options, $inputHeaders, $outputHeaders);
         return $callPromise->wait();
@@ -66,7 +66,7 @@ class SoapClient implements SoapClientInterface
      * @param array|null $outputHeaders
      * @return PromiseInterface
      */
-    public function callAsync($name, array $arguments, array $options = null, $inputHeaders = null, array &$outputHeaders = null): PromiseInterface
+    public function callAsync(string $name, array $arguments, array $options = null, $inputHeaders = null, array &$outputHeaders = null): PromiseInterface
     {
         return Coroutine::of(
             function () use ($name, $arguments, $options, $inputHeaders, &$outputHeaders) {

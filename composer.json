@@ -13,11 +13,21 @@
             "email": "patrique.ouimet@gmail.com"
         }
     ],
+    "repositories": [
+        {
+            "url": "git@github.com:patoui/php-async-soap.git",
+            "type": "git"
+        },
+        {
+            "url": "git@github.com:patoui/soap-http-binding.git",
+            "type": "git"
+        }
+    ],
     "require": {
         "php": "^7.3 || ^8.0",
         "ext-soap": "*",
-        "meng-tian/php-async-soap": "~1.0",
-        "meng-tian/soap-http-binding": "~0.2.0",
+        "meng-tian/php-async-soap": "dev-master",
+        "meng-tian/soap-http-binding": "dev-master",
         "guzzlehttp/guzzle": "^6.1"
     },
     "require-dev": {
