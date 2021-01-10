@@ -23,7 +23,7 @@ class SoapClientTest extends PHPUnit_Framework_TestCase
             'http://www.webservicex.net/Statistics.asmx?WSDL'
         );
         $response = $client->call('GetStatistics', [['X' => [1,2,3]]]);
-        $this->assertNotEmpty($response);
+        self::assertNotEmpty($response);
     }
 
     /**
@@ -38,9 +38,9 @@ class SoapClientTest extends PHPUnit_Framework_TestCase
             $options
         );
         $response = $client->callAsync($function, $args)->wait();
-        $this->assertNotEmpty($response);
+        self::assertNotEmpty($response);
         foreach ($contains as $contain) {
-            $this->assertArrayHasKey($contain, (array)$response);
+            self::assertArrayHasKey($contain, (array)$response);
         }
     }
 

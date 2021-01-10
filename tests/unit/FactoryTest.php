@@ -17,7 +17,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $factory = new Factory();
         $client = $factory->create(new Client(), null, ['uri'=>'', 'location'=>'']);
 
-        $this->assertTrue($client instanceof SoapClient);
+        self::assertInstanceOf(SoapClient::class, $client);
     }
 
     /**
@@ -34,7 +34,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $factory = new Factory();
         $client = $factory->create($clientMock, 'http://www.mysite.com/wsdl');
 
-        $this->assertTrue($client instanceof SoapClient);
+        self::assertInstanceOf(SoapClient::class, $client);
     }
 
     /**
@@ -45,7 +45,7 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $factory = new Factory();
         $client = $factory->create(new Client(), dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example.wsdl');
 
-        $this->assertTrue($client instanceof SoapClient);
+        self::assertInstanceOf(SoapClient::class, $client);
     }
 
     /**
@@ -59,6 +59,6 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         $factory = new Factory();
         $client = $factory->create(new Client(), $wsdl);
 
-        $this->assertTrue($client instanceof SoapClient);
+        self::assertInstanceOf(SoapClient::class, $client);
     }
 }
