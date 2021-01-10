@@ -2,13 +2,14 @@
 
 use GuzzleHttp\Client;
 use Meng\AsyncSoap\Guzzle\Factory;
+use PHPUnit\Framework\TestCase;
 
-class SoapClientTest extends PHPUnit_Framework_TestCase
+class SoapClientTest extends TestCase
 {
     /** @var  Factory */
     private $factory;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->factory = new Factory();
     }

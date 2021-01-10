@@ -1,6 +1,6 @@
 <?php
 
-namespace Meng\AsyncSoap\Guzzle;
+namespace Tests\Unit;
 
 use Exception;
 use GuzzleHttp\Client;
@@ -15,9 +15,12 @@ use GuzzleHttp\Psr7\Response;
 use GuzzleHttp\Exception\RequestException as GuzzleRequestException;
 use Meng\Soap\HttpBinding\HttpBinding;
 use Meng\Soap\HttpBinding\RequestException;
+use Meng\AsyncSoap\Guzzle\SoapClient;
+use PHPUnit\Framework\MockObject\MockObject;
+use PHPUnit\Framework\TestCase;
 use SoapFault;
 
-class SoapClientTest extends \PHPUnit_Framework_TestCase
+class SoapClientTest extends TestCase
 {
     /** @var  MockHandler */
     private $handlerMock;
@@ -25,13 +28,13 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
     /** @var  ClientInterface */
     private $client;
 
-    /** @var  \PHPUnit_Framework_MockObject_MockObject */
+    /** @var HttpBinding|MockObject */
     private $httpBindingMock;
 
     /** @var  PromiseInterface */
     private $httpBindingPromise;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         $this->handlerMock = new MockHandler();
         $handler = new HandlerStack($this->handlerMock);
@@ -39,16 +42,13 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
 
         $this->httpBindingMock = $this->getMockBuilder(HttpBinding::class)
             ->disableOriginalConstructor()
-            ->setMethods(['request', 'response'])
             ->getMock();
     }
 
-    /**
-     * @test
-     */
-    public function magicCallDeferredHttpBindingRejected()
+    /** @test */
+    public function magicCallDeferredHttpBindingRejected(): void
     {
-        $this->setExpectedException(Exception::class);
+        $this->expectException(Exception::class);
         $this->httpBindingPromise = new RejectedPromise(new Exception());
         $this->httpBindingMock->expects(self::never())->method('request');
 
@@ -56,12 +56,10 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         $client->someSoapMethod(['some-key' => 'some-value'])->wait();
     }
 
-    /**
-     * @test
-     */
-    public function magicCallHttpBindingFailed()
+    /** @test */
+    public function magicCallHttpBindingFailed(): void
     {
-        $this->setExpectedException(RequestException::class);
+        $this->expectException(RequestException::class);
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
         $this->httpBindingMock->method('request')
@@ -74,10 +72,8 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         $client->someSoapMethod(['some-key' => 'some-value'])->wait();
     }
 
-    /**
-     * @test
-     */
-    public function magicCall500Response()
+    /** @test */
+    public function magicCall500Response(): void
     {
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
@@ -96,12 +92,10 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         self::assertEquals('SoapResult', $client->someSoapMethod(['some-key' => 'some-value'])->wait());
     }
 
-    /**
-     * @test
-     */
-    public function magicCallResponseNotReceived()
+    /** @test */
+    public function magicCallResponseNotReceived(): void
     {
-        $this->setExpectedException(GuzzleRequestException::class);
+        $this->expectException(GuzzleRequestException::class);
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
         $this->httpBindingMock->method('request')
@@ -116,12 +110,10 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         $client->someSoapMethod(['some-key' => 'some-value'])->wait();
     }
 
-    /**
-     * @test
-     */
-    public function magicCallUndefinedResponse()
+    /** @test */
+    public function magicCallUndefinedResponse(): void
     {
-        $this->setExpectedException(Exception::class);
+        $this->expectException(Exception::class);
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
         $this->httpBindingMock->method('request')
@@ -136,12 +128,10 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         $client->someSoapMethod(['some-key' => 'some-value'])->wait();
     }
 
-    /**
-     * @test
-     */
-    public function magicCallClientReturnSoapFault()
+    /** @test */
+    public function magicCallClientReturnSoapFault(): void
     {
-        $this->setExpectedException(SoapFault::class);
+        $this->expectException(SoapFault::class);
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
         $this->httpBindingMock->method('request')
@@ -159,10 +149,8 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         $client->someSoapMethod(['some-key' => 'some-value'])->wait();
     }
 
-    /**
-     * @test
-     */
-    public function magicCallSuccess()
+    /** @test */
+    public function magicCallSuccess(): void
     {
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 
@@ -181,10 +169,8 @@ class SoapClientTest extends \PHPUnit_Framework_TestCase
         self::assertEquals('SoapResult', $client->someSoapMethod(['some-key' => 'some-value'])->wait());
     }
 
-    /**
-     * @test
-     */
-    public function resultsAreEquivalent()
+    /** @test */
+    public function resultsAreEquivalent(): void
     {
         $this->httpBindingPromise = new FulfilledPromise($this->httpBindingMock);
 

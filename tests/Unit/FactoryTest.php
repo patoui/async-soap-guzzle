@@ -1,18 +1,19 @@
 <?php
 
-namespace Meng\AsyncSoap\Guzzle;
+namespace Tests\Unit;
 
 use GuzzleHttp\Client;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use Meng\AsyncSoap\Guzzle\SoapClient;
+use PHPUnit\Framework\TestCase;
+use Meng\AsyncSoap\Guzzle\Factory;
 
-class FactoryTest extends \PHPUnit_Framework_TestCase
+class FactoryTest extends TestCase
 {
-    /**
-     * @test
-     */
-    public function nonWsdlMode()
+    /** @test */
+    public function nonWsdlMode(): void
     {
         $factory = new Factory();
         $client = $factory->create(new Client(), null, ['uri'=>'', 'location'=>'']);
@@ -20,13 +21,11 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         self::assertInstanceOf(SoapClient::class, $client);
     }
 
-    /**
-     * @test
-     */
-    public function wsdlFromHttpUrl()
+    /** @test */
+    public function wsdlFromHttpUrl(): void
     {
         $handlerMock = new MockHandler([
-            new Response('200', [], fopen(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example.wsdl', 'r'))
+            new Response('200', [], fopen(__DIR__ . DIRECTORY_SEPARATOR . 'example.wsdl', 'rb'))
         ]);
         $handler = new HandlerStack($handlerMock);
         $clientMock = new Client(['handler' => $handler]);
@@ -37,23 +36,19 @@ class FactoryTest extends \PHPUnit_Framework_TestCase
         self::assertInstanceOf(SoapClient::class, $client);
     }
 
-    /**
-     * @test
-     */
-    public function wsdlFromLocalFile()
+    /** @test */
+    public function wsdlFromLocalFile(): void
     {
         $factory = new Factory();
-        $client = $factory->create(new Client(), dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example.wsdl');
+        $client = $factory->create(new Client(), __DIR__ . DIRECTORY_SEPARATOR . 'example.wsdl');
 
         self::assertInstanceOf(SoapClient::class, $client);
     }
 
-    /**
-     * @test
-     */
-    public function wsdlFromDataUri()
+    /** @test */
+    public function wsdlFromDataUri(): void
     {
-        $wsdlString = file_get_contents(dirname(__FILE__) . DIRECTORY_SEPARATOR . 'example.wsdl');
+        $wsdlString = file_get_contents(__DIR__ . DIRECTORY_SEPARATOR . 'example.wsdl');
         $wsdl = 'data://text/plain;base64,' . base64_encode($wsdlString);
 
         $factory = new Factory();
